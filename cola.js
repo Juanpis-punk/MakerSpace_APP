@@ -3,6 +3,7 @@
 //  Importaciones 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
+import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
 
 // Configuración de Firebase
 const firebaseConfig = {
@@ -55,4 +56,109 @@ document.querySelectorAll("#nav a").forEach((link) => {
     }
   });
 });
+
+const queueBoard = document.getElementById("queueBoard");
+const addQueueCardButton = document.getElementById("addQueueCard");
+const colorInput = document.getElementById("cardColor");
+const ownerInput = document.getElementById("ownerName");
+const printInput = document.getElementById("printName");
+
+function removeEmptyState() {
+  const emptyState = queueBoard.querySelector(".queue-empty");
+  if (emptyState) {
+    emptyState.remove();
+  }
+}
+
+function ensureEmptyState() {
+  const queueCards = queueBoard.querySelectorAll(".queue-card:not(.is-sample)");
+  const emptyState = queueBoard.querySelector(".queue-empty");
+
+  if (queueCards.length === 0 && !emptyState) {
+    const message = document.createElement("p");
+    message.className = "queue-empty";
+    message.textContent = "Sin impresiones agregadas a la cola.";
+    queueBoard.appendChild(message);
+  }
+}
+
+function createQueueCard() {
+  const ownerName = ownerInput.value.trim() || "Sin propietario";
+  const printName = printInput.value.trim() || "Impresion sin nombre";
+  const cardColor = colorInput.value;
+
+  const card = document.createElement("article");
+  card.className = "queue-card";
+  card.style.setProperty("--card-accent", cardColor);
+
+  const deleteButton = document.createElement("button");
+  deleteButton.className = "queue-card__delete";
+  deleteButton.type = "button";
+  deleteButton.setAttribute("aria-label", `Eliminar recuadro de ${ownerName}`);
+  deleteButton.innerHTML = '<i class="fa-solid fa-xmark"></i>';
+
+  const badge = document.createElement("div");
+  badge.className = "queue-card__badge";
+  badge.textContent = "En cola";
+
+  const owner = document.createElement("h3");
+  owner.textContent = ownerName;
+
+  const print = document.createElement("p");
+  print.textContent = printName;
+
+  card.append(deleteButton, badge, owner, print);
+  return card;
+}
+
+if (queueBoard && addQueueCardButton && colorInput && ownerInput && printInput) {
+  ensureEmptyState();
+
+  addQueueCardButton.addEventListener("click", async () => {
+    const ownerName = ownerInput.value.trim() || "Sin propietario";
+    const printName = printInput.value.trim() || "Impresion sin nombre";
+    const cardColor = colorInput.value;
+
+    // 🔥 GUARDAR EN FIRESTORE
+    await guardarEnFirestore(ownerName, printName, cardColor);
+
+    removeEmptyState();
+    const card = createQueueCard();
+    queueBoard.prepend(card);
+    ownerInput.value = "";
+    printInput.value = "";
+    ownerInput.focus();
+  });
+
+  queueBoard.addEventListener("click", (event) => {
+    const deleteButton = event.target.closest(".queue-card__delete");
+    if (!deleteButton) {
+      return;
+    }
+
+    const card = deleteButton.closest(".queue-card");
+    if (!card) {
+      return;
+    }
+
+    card.remove();
+    ensureEmptyState();
+  });
+}
+
+async function guardarEnFirestore(ownerName, printName, cardColor) {
+  try {
+    const docRef = await addDoc(collection(db, "cola_impresiones"), {
+      owner: ownerName,
+      print: printName,
+      color: cardColor,
+      estado: "en cola",
+      fecha: new Date()
+    });
+
+    console.log("Guardado con ID:", docRef.id);
+  } catch (error) {
+    console.error("Error guardando:", error);
+  }
+}
 
