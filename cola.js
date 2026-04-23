@@ -1,23 +1,4 @@
 
-
-//  Importaciones 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-app.js";
-import { getFirestore } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
-import { collection, addDoc } from "https://www.gstatic.com/firebasejs/10.0.0/firebase-firestore.js";
-
-// Configuración de Firebase
-const firebaseConfig = {
-  apiKey: "AIzaSyA4-AmQb8yN7-vUAkoALhQq0rgfIiKRr90",
-  authDomain: "makerspaceapp-22322.firebaseapp.com",
-  projectId: "makerspaceapp-22322",
-};
-
-// Inicializar Firebase
-const app = initializeApp(firebaseConfig);
-
-// Inicializar Firestore
-const db = getFirestore(app);
-
 function responsiveMenu() {
   const nav = document.getElementById("nav");
   const toggle = document.querySelector(".menu-toggle");
@@ -115,13 +96,6 @@ if (queueBoard && addQueueCardButton && colorInput && ownerInput && printInput) 
   ensureEmptyState();
 
   addQueueCardButton.addEventListener("click", async () => {
-    const ownerName = ownerInput.value.trim() || "Sin propietario";
-    const printName = printInput.value.trim() || "Impresion sin nombre";
-    const cardColor = colorInput.value;
-
-    // 🔥 GUARDAR EN FIRESTORE
-    await guardarEnFirestore(ownerName, printName, cardColor);
-
     removeEmptyState();
     const card = createQueueCard();
     queueBoard.prepend(card);
@@ -144,21 +118,11 @@ if (queueBoard && addQueueCardButton && colorInput && ownerInput && printInput) 
     card.remove();
     ensureEmptyState();
   });
+
+
 }
 
-async function guardarEnFirestore(ownerName, printName, cardColor) {
-  try {
-    const docRef = await addDoc(collection(db, "cola_impresiones"), {
-      owner: ownerName,
-      print: printName,
-      color: cardColor,
-      estado: "en cola",
-      fecha: new Date()
-    });
 
-    console.log("Guardado con ID:", docRef.id);
-  } catch (error) {
-    console.error("Error guardando:", error);
-  }
-}
+
+
 
