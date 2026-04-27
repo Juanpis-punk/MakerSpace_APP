@@ -10,7 +10,7 @@ document.querySelector('#app').innerHTML = `
     <nav id="nav" class="nav">
       <ul>
         <li><a href="#inicio">Cola de Espera</a></li>
-        <li><a href="">Filamentos</a></li>
+        <li><a href="impresoras.html">Impresoras</a></li>
       </ul>
     </nav>
     <div class="redes"><i class="fa-solid fa-user"></i></div>

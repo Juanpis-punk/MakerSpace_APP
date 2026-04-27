@@ -24,15 +24,36 @@ export function initMakerSpace() {
   // Referencia a la colección en Firestore
   const colRef = collection(db, "colaImpresiones");
 
+
+
   // --- LÓGICA DEL MENÚ ---
   const responsiveMenu = () => {
     const isActive = nav.classList.toggle("active");
     if (toggle) toggle.setAttribute("aria-expanded", String(isActive));
   };
 
+  
   if (toggle) {
     toggle.addEventListener("click", responsiveMenu);
   }
+
+  window.addEventListener("resize", () => {
+    if (window.innerWidth > 768 && nav.classList.contains("active")) {
+      nav.classList.remove("active");
+      toggle.setAttribute("aria-expanded", "false");
+    }
+  });
+
+  document.querySelectorAll("#nav a").forEach((link) => {
+    link.addEventListener("click", () => {
+      if (window.innerWidth <= 768) {
+        nav.classList.remove("active");
+        toggle.setAttribute("aria-expanded", "false");
+      }
+    });
+  });
+
+  
 
   // --- ESCUCHAR FIRESTORE EN TIEMPO REAL ---
   // Esta parte reemplaza a "ensureEmptyState" manual, ya que se actualiza solo
